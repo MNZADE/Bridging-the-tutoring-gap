@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../services/api";
+import api from "../../services/api"; // Make sure API URL points to Render backend
 import loginBg from "../../assets/login-bg.jpeg";
 
 function Login() {
@@ -17,11 +17,13 @@ function Login() {
     try {
       const res = await api.post("/auth/login", formData);
 
+      // Save token and user info in localStorage
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
       alert(res.data.msg);
 
+      // Navigate based on role
       if (res.data.user.role === "admin") {
         navigate("/admin/dashboard");
       } else {
@@ -29,7 +31,7 @@ function Login() {
       }
     } catch (err) {
       console.error(err.response?.data?.error || err.message);
-      alert(err.response?.data?.msg || "Login failed");
+      alert(err.response?.data?.msg || "Login failed. Check credentials or server connection.");
     } finally {
       setLoading(false);
     }
@@ -47,29 +49,21 @@ function Login() {
           position: relative;
           overflow: hidden;
         }
-
         .login-page::before {
           content: "";
           position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: url(${loginBg}) no-repeat center center/cover;
-          filter: blur(6px);
-          z-index: -2;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          background: url(${loginBg}) no-repeat center/cover;
+          filter: blur(6px); z-index: -2;
         }
         .login-page::after {
           content: "";
           position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.35);
-          z-index: -1;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          background: rgba(0, 0, 0, 0.35); z-index: -1;
         }
-
         .login-box {
           background: rgba(255, 255, 255, 0.35);
           backdrop-filter: blur(18px);
@@ -77,27 +71,14 @@ function Login() {
           border-radius: 18px;
           padding: 45px;
           box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-          width: 100%;
-          max-width: 420px;
-          text-align: center;
-          color: #1f2937;
+          width: 100%; max-width: 420px;
+          text-align: center; color: #1f2937;
           animation: zoomIn 0.9s ease;
         }
-        .login-box h2 {
-          font-size: 2rem;
-          margin-bottom: 25px;
-          font-weight: bold;
-          color: #111827;
-        }
-
+        .login-box h2 { font-size: 2rem; margin-bottom: 25px; font-weight: bold; color: #111827; }
         .login-box input {
-          width: 100%;
-          padding: 12px;
-          border: none;
-          border-radius: 10px;
-          font-size: 1rem;
-          outline: none;
-          margin: 10px 0;
+          width: 100%; padding: 12px; border: none; border-radius: 10px;
+          font-size: 1rem; outline: none; margin: 10px 0;
           background: rgba(255, 255, 255, 0.7);
           transition: all 0.3s ease;
         }
@@ -106,105 +87,57 @@ function Login() {
           box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
           transform: scale(1.02);
         }
-
         .login-btn {
           background: linear-gradient(135deg, #2563eb, #1d4ed8);
-          color: white;
-          padding: 12px;
-          border-radius: 12px;
-          font-weight: bold;
-          font-size: 1rem;
-          border: none;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          margin-top: 10px;
+          color: white; padding: 12px; border-radius: 12px;
+          font-weight: bold; font-size: 1rem; border: none;
+          cursor: pointer; transition: all 0.3s ease; margin-top: 10px;
         }
-        .login-btn:disabled {
-          background: #93c5fd;
-          cursor: not-allowed;
-        }
+        .login-btn:disabled { background: #93c5fd; cursor: not-allowed; }
         .login-btn:hover:not(:disabled) {
           background: linear-gradient(135deg, #1d4ed8, #1e40af);
           transform: translateY(-2px) scale(1.04);
           box-shadow: 0 6px 16px rgba(0,0,0,0.2);
         }
-
-        .return-home {
-          margin-top: 20px;
-          font-size: 0.95rem;
-          color: #f9fafb;
-          cursor: pointer;
-          user-select: none;
+        .return-home, .register-prompt {
+          margin-top: 15px; font-size: 0.95rem; cursor: pointer;
+          user-select: none; font-weight: 600;
         }
-        .return-home:hover {
-          text-decoration: underline;
-          color: #facc15;
-        }
-
-        .register-prompt {
-          margin-top: 15px;
-          font-size: 0.95rem;
-          color: #1e40af;
-          cursor: pointer;
-          user-select: none;
-          font-weight: 600;
-        }
-        .register-prompt:hover {
-          text-decoration: underline;
-          color: #2563eb;
-        }
-
-        @keyframes zoomIn {
-          0% { transform: scale(0.85); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
+        .return-home { color: #f9fafb; }
+        .return-home:hover { text-decoration: underline; color: #facc15; }
+        .register-prompt { color: #1e40af; }
+        .register-prompt:hover { text-decoration: underline; color: #2563eb; }
+        @keyframes zoomIn { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
       `}</style>
 
       <div className="login-box">
         <h2>Welcome Back 👋</h2>
-        {React.createElement(
-          "form",
-          { onSubmit: handleSubmit },
-          React.createElement("input", {
-            type: "email",
-            name: "email",
-            placeholder: "Enter your email",
-            value: formData.email,
-            onChange: handleChange,
-            required: true,
-          }),
-          React.createElement("input", {
-            type: "password",
-            name: "password",
-            placeholder: "Enter your password",
-            value: formData.password,
-            onChange: handleChange,
-            required: true,
-          }),
-          React.createElement(
-            "button",
-            { type: "submit", className: "login-btn", disabled: loading },
-            loading ? "Logging in..." : "Login"
-          )
-        )}
+        <form onSubmit={handleSubmit}>
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
 
-        <div
-          className="register-prompt"
-          onClick={() => navigate("/register")}
-          role="button"
-          tabIndex={0}
-          onKeyPress={(e) => e.key === "Enter" && navigate("/register")}
-        >
+        <div className="register-prompt" onClick={() => navigate("/register")}>
           Don't have an account? Register
         </div>
-
-        <div
-          className="return-home"
-          onClick={() => navigate("/")}
-          role="button"
-          tabIndex={0}
-          onKeyPress={(e) => e.key === "Enter" && navigate("/")}
-        >
+        <div className="return-home" onClick={() => navigate("/")}>
           ← Return Home
         </div>
       </div>
