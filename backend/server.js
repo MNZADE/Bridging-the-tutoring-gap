@@ -1,3 +1,4 @@
+// server.js
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -15,20 +16,21 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Initialize OpenAI
+// ✅ Initialize OpenAI (use backend env variable)
 const openai = new OpenAI({
-  apiKey: process.env.REACT_APP_OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-// ✅ Connect to MongoDB Atlas
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log("✅ MongoDB Connected"))
-.catch((err) => console.error("❌ MongoDB Error:", err));
+// ✅ Connect to MongoDB
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.error("❌ MongoDB Error:", err));
 
-// ✅ Routes
+// ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/quiz-results", quizResultsRoutes);
@@ -37,13 +39,14 @@ app.use("/api/quiz-results", quizResultsRoutes);
 app.post("/api/chat", async (req, res) => {
   try {
     const { messages } = req.body;
-    const formattedMessages = messages.map(msg => ({
+    const formattedMessages = messages.map((msg) => ({
       role: msg.sender === "user" ? "user" : "assistant",
       content: msg.text,
     }));
     formattedMessages.unshift({
       role: "system",
-      content: "You are a helpful AI learning assistant for students. Provide concise and educational responses.",
+      content:
+        "You are a helpful AI learning assistant for students. Provide concise and educational responses.",
     });
 
     const completion = await openai.chat.completions.create({
@@ -70,6 +73,7 @@ app.get("/api/health", (req, res) => res.json({ status: "OK" }));
 // ✅ Serve React Frontend
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 app.use(express.static(path.join(__dirname, "build")));
 
 app.get("*", (req, res) => {
