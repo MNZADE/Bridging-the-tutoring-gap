@@ -37,7 +37,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, "build")));
 
-app.get("*", (req, res) => {
+// Use '/*' for catch-all instead of '*'
+app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
